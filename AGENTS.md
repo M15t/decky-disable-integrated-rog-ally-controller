@@ -44,14 +44,16 @@ On plugin start (`_main`), `prefer_external` is loaded from settings. If it is m
 
 `run_cmd` strips `LD_LIBRARY_PATH` / `LD_PRELOAD` before calling `systemctl` or other subprocesses (Steam runtime pollution).
 
-`main.py` also contains unused inputplumber-profile and `steamos-manager` helpers (`PROFILE_CONTENT`, `ensure_profile_exists`, `set_profile_disabled`, `mask_steamos_manager`, hiding `/usr/share/inputplumber/devices/50-rog_ally.yaml`). They are **not** on the current toggle path.
+Blocking work (sysfs, `systemctl`) runs via `asyncio.to_thread`; every bind/unbind + mask path goes through `Plugin._apply`, whose worker holds a `threading.Lock` and reads `prefer_external` at run time, so a cancelled or queued apply cannot overwrite a newer state. `mask_service` logs non-zero `systemctl` exit codes.
+
+`_uninstall` turns prefer-external off, stops the watch loop, and re-enables the built-in pad, because the `inputplumber` mask persists across reboots.
 
 ## Hardware / UX constraints
 
 - Original Ally (`RC71L`) uses xpad `045e:028e` plus N-key `0b05:1abe`. Ally X (`RC72LA`), Xbox Ally X (`RC73XA`), and Xbox Ally (`RC73YA`) use ASUS HID `0b05:1b4c` interfaces 2 and 5 (`lsusb` shows `N-KEY Device`; `js` shows `ASUS ROG Ally X Gamepad` on interface 5).
 - Tested on ROG Ally Extreme Z1 with an 8BitDo Ultimate 2C. Ally X family IDs confirmed from a live `lsusb` + `/sys/class/input` dump; toggle path not yet verified on that hardware.
 - While the integrated controller is off, the Armoury Crate button does not work. Open Decky with **Power+A**, then re-enable in the plugin. Many external pads map their guide button to Armoury Crate.
-- Masking `inputplumber` can affect extra-button / gyro plumbing. Current toggle does **not** mask `steamos-manager`, so battery charge limit and related SteamOS manager features should keep working. An unused `mask_steamos_manager` helper remains in `main.py`. Plugin is use-at-your-own-risk; it should not delete config, only bind/unbind and mask/unmask.
+- Masking `inputplumber` can affect extra-button / gyro plumbing. Current toggle does **not** mask `steamos-manager`, so battery charge limit and related SteamOS manager features should keep working. Plugin is use-at-your-own-risk; it should not delete config, only bind/unbind and mask/unmask.
 
 ## Template leftovers
 

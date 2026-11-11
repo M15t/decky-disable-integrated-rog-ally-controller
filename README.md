@@ -36,7 +36,7 @@ When a 3rd-party controller is present and prefer-external is on, the plugin cur
 
 It does **not** stop `steamos-manager`. Battery charge limit, TDP, BIOS/dock updates, WiFi, and similar SteamOS manager features stay available.
 
-Older versions of this plugin *did* mask `steamos-manager`. That leftover helper is still in [main.py](main.py) but is unused. Masking `inputplumber` can still affect extra-button / gyro plumbing; use at your own risk. The plugin does not delete config files.
+Older versions of this plugin *did* mask `steamos-manager`. Masking `inputplumber` can still affect extra-button / gyro plumbing; use at your own risk. The plugin does not delete config files. Uninstalling the plugin from Decky re-binds the built-in gamepad and unmasks `inputplumber`.
 
 ## Disclaimer
 
